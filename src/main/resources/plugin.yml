@@ -5,6 +5,8 @@ depend:
 version: ${project.version}
 main: nl.ijsglijder.traincraft.TrainCraft
 api-version: 1.15
+description: Rail signals for mc!
+author: ijsglijder
 
 commands:
   signal:
