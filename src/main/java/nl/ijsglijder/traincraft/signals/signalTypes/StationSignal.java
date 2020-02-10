@@ -104,11 +104,9 @@ public class StationSignal extends SignalClass {
 
     @Override
     public void onNextBlockClear() {
-        super.setOccupiedNext(false);
     }
 
     @Override
     public void onNextBlockNotClear() {
-        super.setOccupiedNext(true);
     }
 }
