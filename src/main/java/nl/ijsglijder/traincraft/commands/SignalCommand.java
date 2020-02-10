@@ -69,39 +69,45 @@ public class SignalCommand implements CommandExecutor, Listener {
 
         Player player = (Player) sender;
 
+        if(!player.hasPermission("trainsignals.use")) {
+            player.sendMessage(ChatColor.RED + "You do not have enough perms to use this command.");
+            return true;
+        }
+
         if(args.length == 0) {
-            player.sendMessage(ChatColor.GREEN + "Signal command help:\n\n/signal create\nCreate a new signal");
+            player.sendMessage(ChatColor.GREEN + "Signal command help:\n" + ChatColor.AQUA + "\n/signal create    Create a new signal\n/signal delete    Delete a signal\n/signal link    add a link on a signal" +
+                    "\n/signal unlink   delete a link on a signal");
             return true;
         }
 
         if(args[0].equalsIgnoreCase("create")) {
             playerCreateStage.put(player, 1);
-            player.sendMessage(ChatColor.DARK_AQUA + "Please type the signal name");
+            player.sendMessage(ChatColor.BLUE + "Please type the signal name");
             return true;
         }
 
         if(args[0].equalsIgnoreCase("delete")) {
             playerDeleteStage.add(player);
-            player.sendMessage(ChatColor.DARK_AQUA + "Hit the cobblestone wall of the signal to remove it.");
+            player.sendMessage(ChatColor.BLUE + "Hit the cobblestone wall of the signal to remove it.");
             return true;
         }
 
         if(args[0].equalsIgnoreCase("link")) {
             linkingStage.put(player, 1);
-            player.sendMessage(ChatColor.DARK_AQUA + "Hit the cobblestone wall of the signal you want to select");
+            player.sendMessage(ChatColor.BLUE + "Hit the cobblestone wall of the signal you want to select");
             return true;
         }
 
         if(args[0].equalsIgnoreCase("unlink")) {
             linkingStage.put(player, 1);
             unLinkingPlayers.add(player);
-            player.sendMessage(ChatColor.DARK_AQUA + "Hit the cobblestone wall of the signal you want to select");
+            player.sendMessage(ChatColor.BLUE + "Hit the cobblestone wall of the signal you want to select");
             return true;
         }
 
         if(args[0].equalsIgnoreCase("refreshdetector")) {
             if(args.length < 2) {
-                player.sendMessage(ChatColor.GRAY + "Usage: /signal refreshdetector (signalID)");
+                player.sendMessage(ChatColor.BLUE + "Usage: /signal refreshdetector (signalID)");
                 return true;
             }
             String signalID = args[1];
@@ -111,7 +117,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                 return true;
             }
             signalClass.recalculateDetector();
-            player.sendMessage(ChatColor.GRAY + "DetectorRegion has been refreshed");
+            player.sendMessage(ChatColor.BLUE + "DetectorRegion has been refreshed");
             return true;
         }
 
@@ -146,25 +152,25 @@ public class SignalCommand implements CommandExecutor, Listener {
                         playerDirectionStage.put(player, lookingDirection);
                         playerCreateStage.replace(player, 3);
                         assert lookingDirection != null;
-                        player.sendMessage(ChatColor.DARK_AQUA + "Please select the ground where the signal is going to be. You selected " + lookingDirection.toString() + " | " + rotation);
+                        player.sendMessage(ChatColor.BLUE + "Please select the ground where the signal is going to be. You selected " + lookingDirection.toString() + " | " + rotation);
                         break;
                     }
                     player.sendMessage(ChatColor.DARK_AQUA + "Please look at the direction that you want the signal to be faced and say \"done\"");
                     break;
                 case 3:
-                    player.sendMessage(ChatColor.DARK_AQUA + "Please select the ground where the signal is going to be");
+                    player.sendMessage(ChatColor.BLUE + "Please select the ground where the signal is going to be");
                     break;
                 case 4:
                     player.sendMessage(ChatColor.DARK_AQUA + "Please select the block where the station redstone input is going to be");
                     break;
                 case 5:
-                    player.sendMessage(ChatColor.DARK_AQUA + "Please select the block where the train will slowdown on yellow signal is going to be");
+                    player.sendMessage(ChatColor.BLUE + "Please select the block where the train will slowdown on yellow signal is going to be");
                     break;
                 case 6:
                     player.sendMessage(ChatColor.DARK_AQUA + "Please select the rail where the first train block location is");
                     break;
                 case 7:
-                    player.sendMessage(ChatColor.DARK_AQUA + "Please select the rail where the second train block location is");
+                    player.sendMessage(ChatColor.BLUE + "Please select the rail where the second train block location is");
                     break;
                 case 8:
                     if(event.getMessage().equalsIgnoreCase("done")) {
@@ -178,7 +184,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                     SignalType type = SignalType.valueOf(event.getMessage().toUpperCase());
                     switch(type) {
                         case NORMAL:
-                            player.sendMessage("Finished setup");
+                            player.sendMessage(ChatColor.BLUE + "Finished setup");
                             playerSignalType.put(player, type);
                             finishSetup(player);
                             playerCreateStage.remove(player);
@@ -186,7 +192,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                         case STATION:
                             playerSignalType.put(player, type);
                             playerCreateStage.replace(player, 10);
-                            player.sendMessage(ChatColor.DARK_AQUA + "Please type the length in seconds that the trains need to wait at the station.");
+                            player.sendMessage(ChatColor.BLUE + "Please type the length in seconds that the trains need to wait at the station.");
                             break;
                         default:
                             player.sendMessage(ChatColor.DARK_AQUA + "What type of signal do you want, types are\n\nNormal\nStation");
@@ -200,10 +206,10 @@ public class SignalCommand implements CommandExecutor, Listener {
                             try {
                                 int i = Integer.parseInt(event.getMessage());
                                 playerStationLength.put(player, i);
-                                player.sendMessage(ChatColor.DARK_AQUA + "Select the signal before the station");
+                                player.sendMessage(ChatColor.BLUE + "Select the signal before the station");
                                 playerCreateStage.replace(player, 11);
                             } catch(NumberFormatException e) {
-                                player.sendMessage(ChatColor.DARK_AQUA + "Please type the length in seconds that the trains need to wait at the station.");
+                                player.sendMessage(ChatColor.RED + "Please type the length in seconds that the trains need to wait at the station.");
                             }
                             break;
                         case NORMAL:
@@ -289,7 +295,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                     event.setCancelled(true);
                     playerLocationStaStage.put(player, block.getLocation());
                     playerCreateStage.replace(player, 5);
-                    player.sendMessage(ChatColor.DARK_AQUA + "Please select the block where the train will slowdown on yellow signal is going to be");
+                    player.sendMessage(ChatColor.BLUE + "Please select the block where the train will slowdown on yellow signal is going to be");
                     break;
                 case 5:
                     event.setCancelled(true);
@@ -302,7 +308,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                     event.setCancelled(true);
                     playerLocationBlock1Stage.put(player, block.getLocation());
                     playerCreateStage.replace(player, 7);
-                    player.sendMessage(ChatColor.DARK_AQUA + "Please select the rail where the second train block location is");
+                    player.sendMessage(ChatColor.BLUE + "Please select the rail where the second train block location is");
                     break;
                 case 7:
                     event.setCancelled(true);
@@ -314,13 +320,13 @@ public class SignalCommand implements CommandExecutor, Listener {
                 case 8:
                     event.setCancelled(true);
                     if(block.getType() != Material.COBBLESTONE_WALL || TrainCraft.getSignalManager().getSignal(new SignalVector(block.getLocation())) == null) {
-                        player.sendMessage(ChatColor.DARK_AQUA + "Please hit the cobblestone wall of the signal!");
+                        player.sendMessage(ChatColor.BLUE + "Please hit the cobblestone wall of the signal!");
                         break;
                     }
                     List<String> stringList = playerLinkStage.get(player);
                     stringList.add(TrainCraft.getSignalManager().getSignal(new SignalVector(block.getLocation())).getSignalID());
                     playerLinkStage.replace(player, stringList);
-                    player.sendMessage(TrainCraft.getSignalManager().getSignal(new SignalVector(block.getLocation())).toString() + " has been added to the links, type \"done\" when you are done");
+                    player.sendMessage(TrainCraft.getSignalManager().getSignal(ChatColor.BLUE.toString() + new SignalVector(block.getLocation())).toString() + " has been added to the links, type \"done\" when you are done");
                     break;
                 case 11:
                     switch(playerSignalType.get(player)) {
@@ -331,7 +337,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                                 break;
                             }
                             playerStationLink.put(player, TrainCraft.getSignalManager().getSignal(new SignalVector(block.getLocation())).getSignalID());
-                            player.sendMessage("Finish");
+                            player.sendMessage(ChatColor.DARK_AQUA + "Finish");
                             finishSetup(player);
                             playerCreateStage.remove(player);
                             break;
@@ -340,7 +346,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                     }
                     break;
                 default:
-                    player.sendMessage("Error!");
+                    player.sendMessage(ChatColor.RED + "Error!");
                     playerCreateStage.remove(player);
                     break;
             }
@@ -352,7 +358,7 @@ public class SignalCommand implements CommandExecutor, Listener {
             }
 
             if(block.getType() != Material.COBBLESTONE_WALL) {
-                player.sendMessage(ChatColor.GREEN + "You need to hit the cobblestone wall of the signal!") ;
+                player.sendMessage(ChatColor.RED + "You need to hit the cobblestone wall of the signal!") ;
             }
 
             SignalClass signal = signalManager.getSignal(new SignalVector(block.getLocation()));
@@ -364,7 +370,7 @@ public class SignalCommand implements CommandExecutor, Listener {
 
             signalManager.removeSignal(signal, true);
             playerDeleteStage.remove(player);
-            player.sendMessage(ChatColor.RED + "removed the signal!");
+            player.sendMessage(ChatColor.DARK_GREEN + "removed the signal!");
         }
         if(linkingStage.containsKey(player)) {
             Block block = event.getClickedBlock();
@@ -374,7 +380,7 @@ public class SignalCommand implements CommandExecutor, Listener {
             }
 
             if(block.getType() != Material.COBBLESTONE_WALL) {
-                player.sendMessage(ChatColor.GREEN + "You need to hit the cobblestone wall of the signal!") ;
+                player.sendMessage(ChatColor.RED + "You need to hit the cobblestone wall of the signal!") ;
             }
 
             switch(linkingStage.get(player)) {
@@ -387,9 +393,9 @@ public class SignalCommand implements CommandExecutor, Listener {
                     }
                     signalClassHashMap.put(player, signal);
                     if(unLinkingPlayers.contains(player)) {
-                        player.sendMessage("Now select the signals that you want to remove the link");
+                        player.sendMessage(ChatColor.AQUA + "Now select the signals that you want to remove the link");
                     } else {
-                        player.sendMessage("Now select the signals that you want to link it with");
+                        player.sendMessage(ChatColor.AQUA + "Now select the signals that you want to link it with");
                     }
                     linkingStage.replace(player, 2);
                     signalLinks.put(player, new ArrayList<>());
@@ -405,9 +411,9 @@ public class SignalCommand implements CommandExecutor, Listener {
                     linkedSignals.add(signal2.getSignalID());
                     signalLinks.replace(player, linkedSignals);
                     if(unLinkingPlayers.contains(player)) {
-                        player.sendMessage("Added " + signal2.getSignalID() + " to the unlinked signals. Type \"done\" to finish the linking");
+                        player.sendMessage(ChatColor.BLUE + "Added " + signal2.getSignalID() + " to the unlinked signals. Type \"done\" to finish the linking");
                     } else {
-                        player.sendMessage("Added " + signal2.getSignalID() + " to the linked signals. Type \"done\" to finish the linking");
+                        player.sendMessage(ChatColor.BLUE + "Added " + signal2.getSignalID() + " to the linked signals. Type \"done\" to finish the linking");
                     }
             }
 
