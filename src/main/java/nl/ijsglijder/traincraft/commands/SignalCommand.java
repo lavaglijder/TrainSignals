@@ -15,6 +15,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,12 +25,14 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class SignalCommand implements CommandExecutor, Listener {
+public class SignalCommand implements CommandExecutor, Listener, TabCompleter {
 
     //Creating
     HashMap<Player, Integer> playerCreateStage = new HashMap<>();
@@ -491,5 +494,42 @@ public class SignalCommand implements CommandExecutor, Listener {
         playerSignalType.remove(player);
 
         TrainCraft.getFileManager().getFile("signals.yml").save();
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        List<String> strings = new ArrayList<>();
+
+        if(args.length == 0) {
+            strings.add("link");
+            strings.add("unlink");
+            strings.add("delete");
+            strings.add("refreshdetector");
+        }
+        if(args.length == 1) {
+            strings.add("link");
+            strings.add("unlink");
+            strings.add("delete");
+            strings.add("refreshdetector");
+        }
+        if(args.length == 2) {
+            switch(args[0]) {
+                case "link":
+                case "unlink":
+                case "delete":
+                    break;
+                case "refreshdetector":
+                    TrainCraft.getSignalManager().getSignals().forEach((signalVector, signalClass) -> strings.add(signalClass.getSignalID()));
+                    break;
+            }
+        }
+
+        Collections.sort(strings);
+
+        List<String> finalCompletions = new ArrayList<>();
+        strings.forEach(s -> {
+            if(s.startsWith(args[args.length - 1]) && !s.equalsIgnoreCase(args[args.length - 1])) finalCompletions.add(s);
+        });
+        return finalCompletions;
     }
 }

@@ -9,6 +9,9 @@ import nl.ijsglijder.traincraft.signals.SignalManager;
 import nl.ijsglijder.traincraft.signals.signalTypes.StationSignal;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -59,8 +62,14 @@ public final class TrainCraft extends JavaPlugin {
             signals.getStringList(key + ".linkedSignals").forEach(s -> signalManager.addLink(s, key));
             getLogger().info(signalManager.getSignals().size() + " signals loaded");
         });
+        registerCommand(Objects.requireNonNull(getCommand("signal")), new SignalCommand());
+    }
 
-        Objects.requireNonNull(getCommand("signal")).setExecutor(new SignalCommand());
+    public void registerCommand(PluginCommand command, CommandExecutor commandExecutor) {
+        command.setExecutor(commandExecutor);
+        if(commandExecutor instanceof TabCompleter) {
+            command.setTabCompleter((TabCompleter) commandExecutor);
+        }
     }
 
     @Override
