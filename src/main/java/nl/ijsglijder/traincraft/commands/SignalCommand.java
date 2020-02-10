@@ -76,7 +76,7 @@ public class SignalCommand implements CommandExecutor, Listener {
 
         if(args.length == 0) {
             player.sendMessage(ChatColor.GREEN + "Signal command help:\n" + ChatColor.AQUA + "\n/signal create    Create a new signal\n/signal delete    Delete a signal\n/signal link    add a link on a signal" +
-                    "\n/signal unlink   delete a link on a signal");
+                    "\n/signal unlink   delete a link on a signal\n/signal refreshdetector    refresh a detectorregion");
             return true;
         }
 
