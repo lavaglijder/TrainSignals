@@ -167,6 +167,17 @@ public class SignalClass {
                 if(signalManager.getSignal(s) != null) signalManager.getSignal(s).onNextBlockClear();
             });
         }
+        if(signalManager.getLinkedStationSignals(signalID) != null) {
+            signalManager.getLinkedStationSignals(signalID).forEach(s -> {
+                if(signalManager.getSignal(s) != null) {
+                    SignalClass signalSelected = signalManager.getSignal(s);
+                    if(signalSelected instanceof StationSignal) {
+                        StationSignal stationSignal = (StationSignal) signalSelected;
+                        stationSignal.onTrainLeavesStation(minecartGroup);
+                    }
+                }
+            });
+        }
     }
 
     public void onNextBlockClear() {
