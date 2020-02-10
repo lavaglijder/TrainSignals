@@ -148,7 +148,7 @@ public class SignalCommand implements CommandExecutor, Listener, TabCompleter {
                     if(event.getMessage().equalsIgnoreCase("done")) {
                         double rotation = (((player.getLocation().getYaw()) % 360) - 180);
                         if (rotation < 0) {
-                            rotation += 360.0;
+                            rotation = rotation + 360.0;
                         }
                         LookingDirection lookingDirection = LookingDirection.getDirection(rotation);
 
