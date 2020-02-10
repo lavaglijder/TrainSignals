@@ -1,16 +1,11 @@
 package nl.ijsglijder.traincraft.signals;
 
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import com.bergerkiller.bukkit.tc.controller.MinecartMember;
-import com.bergerkiller.bukkit.tc.signactions.detector.DetectorSignPair;
 import nl.ijsglijder.traincraft.TrainCraft;
 import nl.ijsglijder.traincraft.files.TrainFile;
 import nl.ijsglijder.traincraft.signals.signalTypes.StationSignal;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -19,12 +14,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 
-import java.awt.event.ItemListener;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 public class SignalClass {
 
@@ -84,7 +76,7 @@ public class SignalClass {
         as3.setArms(false);
         as3.setSmall(true);
         as3.setDisabledSlots(EquipmentSlot.CHEST, EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.HEAD);
-        as3.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+        Objects.requireNonNull(as3.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
         as3.setLeftArmPose(new EulerAngle(0, 50, 90));
         as3.addScoreboardTag("Signal_"+signalID);
         as3.setVisible(false);
@@ -98,7 +90,7 @@ public class SignalClass {
         as2.setArms(false);
         as2.setSmall(true);
         as2.setDisabledSlots(EquipmentSlot.CHEST, EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.HEAD);
-        as2.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+        Objects.requireNonNull(as2.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
         as2.setLeftArmPose(new EulerAngle(0, 50, 90));
         as2.addScoreboardTag("Signal_"+signalID);
         as2.setVisible(false);
@@ -112,7 +104,7 @@ public class SignalClass {
         as1.setArms(false);
         as1.setSmall(true);
         as1.setDisabledSlots(EquipmentSlot.CHEST, EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.HEAD);
-        as1.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+        Objects.requireNonNull(as1.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
         as1.setLeftArmPose(new EulerAngle(0, 50, 90));
         as1.addScoreboardTag("Signal_"+signalID);
         as1.setVisible(false);
@@ -125,7 +117,6 @@ public class SignalClass {
                 signalBlock = new SignalBlock(block1.getBlock(), block2.getBlock(), signalClass);
             }
         }.runTask(TrainCraft.getPlugin(TrainCraft.class));
-
     }
 
     public LookingDirection getLookingDirection() {
@@ -220,9 +211,9 @@ public class SignalClass {
         SignalManager signalManager = TrainCraft.getSignalManager();
         switch (status) {
             case RED:
-                as1.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
-                as2.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
-                as3.getEquipment().setHelmet(new ItemStack(Material.RED_CONCRETE));
+                Objects.requireNonNull(as1.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+                Objects.requireNonNull(as2.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+                Objects.requireNonNull(as3.getEquipment()).setHelmet(new ItemStack(Material.RED_CONCRETE));
                 stationInput.getBlock().setType(Material.TORCH);
                 speedLimitSetter.getBlock().setType(Material.TORCH);
                 if(!this.currentStatus.equals(SignalStatus.RED)) {
@@ -235,9 +226,9 @@ public class SignalClass {
                 this.currentStatus = SignalStatus.RED;
                 break;
             case GREEN:
-                as1.getEquipment().setHelmet(new ItemStack(Material.GREEN_CONCRETE));
-                as2.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
-                as3.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+                Objects.requireNonNull(as1.getEquipment()).setHelmet(new ItemStack(Material.GREEN_CONCRETE));
+                Objects.requireNonNull(as2.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+                Objects.requireNonNull(as3.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
                 stationInput.getBlock().setType(Material.REDSTONE_TORCH);
                 speedLimitSetter.getBlock().setType(Material.TORCH);
                 if(this.currentStatus.equals(SignalStatus.RED)) {
@@ -250,9 +241,9 @@ public class SignalClass {
                 this.currentStatus = SignalStatus.GREEN;
                 break;
             case YELLOW:
-                as1.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
-                as2.getEquipment().setHelmet(new ItemStack(Material.YELLOW_CONCRETE));
-                as3.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+                Objects.requireNonNull(as1.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+                Objects.requireNonNull(as2.getEquipment()).setHelmet(new ItemStack(Material.YELLOW_CONCRETE));
+                Objects.requireNonNull(as3.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
                 stationInput.getBlock().setType(Material.REDSTONE_TORCH);
                 speedLimitSetter.getBlock().setType(Material.REDSTONE_TORCH);
                 if(this.currentStatus.equals(SignalStatus.RED)) {
@@ -265,9 +256,9 @@ public class SignalClass {
                 this.currentStatus = SignalStatus.YELLOW;
                 break;
             case NONE:
-                as1.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
-                as2.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
-                as3.getEquipment().setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+                Objects.requireNonNull(as1.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+                Objects.requireNonNull(as2.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
+                Objects.requireNonNull(as3.getEquipment()).setHelmet(new ItemStack(Material.GRAY_CONCRETE));
                 stationInput.getBlock().setType(Material.TORCH);
                 speedLimitSetter.getBlock().setType(Material.TORCH);
                 if(this.currentStatus.equals(SignalStatus.RED)) {

@@ -28,7 +28,7 @@ public class StationSignal extends SignalClass {
             public void run() {
                 setSignalStatus(SignalStatus.RED);
             }
-        }.runTaskLater(TrainCraft.getPlugin(TrainCraft.class), 0);
+        }.runTask(TrainCraft.getPlugin(TrainCraft.class));
     }
 
     public void onTrainEnterStation(MinecartGroup minecartGroup) {
