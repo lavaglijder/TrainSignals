@@ -1,22 +1,20 @@
 package nl.ijsglijder.traincraft.signals;
 
-import com.bergerkiller.bukkit.common.math.Vector3;
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
-import com.bergerkiller.bukkit.tc.controller.components.RailPath;
 import com.bergerkiller.bukkit.tc.detector.DetectorListener;
 import com.bergerkiller.bukkit.tc.detector.DetectorRegion;
 import com.bergerkiller.bukkit.tc.utils.TrackMovingPoint;
-import com.bergerkiller.bukkit.tc.utils.TrackWalkingPoint;
 import nl.ijsglijder.traincraft.TrainCraft;
-import nl.ijsglijder.traincraft.files.FileManager;
 import nl.ijsglijder.traincraft.files.TrainFile;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.util.Vector;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.UUID;
 
 public class SignalBlock implements DetectorListener {
 
@@ -77,8 +75,6 @@ public class SignalBlock implements DetectorListener {
         }
 
         region.register(this);
-
-
     }
 
     @Override
