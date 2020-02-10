@@ -60,8 +60,8 @@ public final class TrainCraft extends JavaPlugin {
 
 
             signals.getStringList(key + ".linkedSignals").forEach(s -> signalManager.addLink(s, key));
-            getLogger().info(signalManager.getSignals().size() + " signals loaded");
         });
+        getLogger().info(signalManager.getSignals().size() + " signals loaded");
         registerCommand(Objects.requireNonNull(getCommand("signal")), new SignalCommand());
     }
 
