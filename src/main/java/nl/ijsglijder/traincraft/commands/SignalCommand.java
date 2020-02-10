@@ -1,6 +1,5 @@
 package nl.ijsglijder.traincraft.commands;
 
-import com.google.common.xml.XmlEscapers;
 import nl.ijsglijder.traincraft.TrainCraft;
 import nl.ijsglijder.traincraft.signals.LookingDirection;
 import nl.ijsglijder.traincraft.signals.SignalClass;
@@ -13,7 +12,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,8 +24,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import sun.misc.Signal;
-import sun.text.resources.cldr.ka.FormatData_ka;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -149,6 +145,7 @@ public class SignalCommand implements CommandExecutor, Listener {
 
                         playerDirectionStage.put(player, lookingDirection);
                         playerCreateStage.replace(player, 3);
+                        assert lookingDirection != null;
                         player.sendMessage(ChatColor.DARK_AQUA + "Please select the ground where the signal is going to be. You selected " + lookingDirection.toString() + " | " + rotation);
                         break;
                     }
@@ -182,6 +179,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                     switch(type) {
                         case NORMAL:
                             player.sendMessage("Finished setup");
+                            playerSignalType.put(player, type);
                             finishSetup(player);
                             playerCreateStage.remove(player);
                             break;
@@ -208,7 +206,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                                 player.sendMessage(ChatColor.DARK_AQUA + "Please type the length in seconds that the trains need to wait at the station.");
                             }
                             break;
-                        default:
+                        case NORMAL:
                             break;
                     }
                     break;
@@ -337,7 +335,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                             finishSetup(player);
                             playerCreateStage.remove(player);
                             break;
-                        default:
+                        case NORMAL:
                             break;
                     }
                     break;
@@ -423,20 +421,35 @@ public class SignalCommand implements CommandExecutor, Listener {
         FileConfiguration signalsData = TrainCraft.getFileManager().getFile("signals.yml").getFc();
 
         String name = playerSignalName.get(player);
+
         Location signalLoc = playerLocationSigStage.get(player);
         signalsData.set(name + ".coords", new SignalVector(signalLoc).toString());
+        playerLocationSigStage.remove(player);
+
         Location stationLoc = playerLocationStaStage.get(player);
         signalsData.set(name + ".coordsStation", new SignalVector(stationLoc).toString());
+        playerLocationStaStage.remove(player);
+
         Location speedLimitLoc = playerLocationSpeedStage.get(player);
         signalsData.set(name + ".coordsSpeedlimitSetter", new SignalVector(speedLimitLoc).toString());
+        playerLocationSpeedStage.remove(player);
+
         Location block1Loc = playerLocationBlock1Stage.get(player);
         signalsData.set(name + ".coordsBlock1", new SignalVector(block1Loc).toString());
+        playerLocationBlock1Stage.remove(player);
+
         Location block2Loc = playerLocationBlock2Stage.get(player);
         signalsData.set(name + ".coordsBlock2", new SignalVector(block2Loc).toString());
+        playerLocationBlock2Stage.remove(player);
+
         LookingDirection direction = playerDirectionStage.get(player);
         signalsData.set(name + ".direction", direction.toString());
+        playerDirectionStage.remove(player);
+
         List<String> links = playerLinkStage.get(player);
         signalsData.set(name + ".linkedSignals", links);
+        playerLinkStage.remove(player);
+
         SignalType type = playerSignalType.get(player);
         signalsData.set(name + ".type", type.toString());
 
@@ -444,8 +457,11 @@ public class SignalCommand implements CommandExecutor, Listener {
             case STATION:
                 int  waitLength = playerStationLength.get(player);
                 signalsData.set(name + ".waitTime", waitLength);
+                playerStationLength.remove(player);
+
                 String linkedSignal = playerStationLink.get(player);
                 signalsData.set(name + ".stationSignal", linkedSignal);
+                playerStationLink.remove(player);
 
                 new BukkitRunnable() {
                     @Override
@@ -453,9 +469,7 @@ public class SignalCommand implements CommandExecutor, Listener {
                         signalManager.addSignal(new StationSignal(signalLoc, name, direction, stationLoc, speedLimitLoc, block1Loc, block2Loc, waitLength, linkedSignal));
                     }
                 }.runTaskLater(TrainCraft.getPlugin(TrainCraft.class), 0);
-                links.forEach(s -> {
-                    signalManager.addLink(s, name);
-                });
+                links.forEach(s -> signalManager.addLink(s, name));
                 signalManager.addStationLink(linkedSignal, name);
                 break;
             case NORMAL:
@@ -465,11 +479,11 @@ public class SignalCommand implements CommandExecutor, Listener {
                         signalManager.addSignal(new SignalClass(signalLoc, name, direction, stationLoc, speedLimitLoc, block1Loc, block2Loc));
                     }
                 }.runTaskLater(TrainCraft.getPlugin(TrainCraft.class), 0);
-                links.forEach(s -> {
-                    signalManager.addLink(name, s);
-                });
+                links.forEach(s -> signalManager.addLink(name, s));
                 break;
         }
+        playerSignalType.remove(player);
+
         TrainCraft.getFileManager().getFile("signals.yml").save();
     }
 }
