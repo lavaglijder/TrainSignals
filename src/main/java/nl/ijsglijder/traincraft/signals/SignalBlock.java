@@ -51,6 +51,10 @@ public class SignalBlock implements DetectorListener {
                 TrainCraft.getPlugin(TrainCraft.class).getLogger().info("Failed to get the detection region for signal " + signal.getSignalID() + " at " + signal.getVector().toString());
             }
 
+            if(blockCollection.isEmpty()) {
+                blockCollection.add(block1);
+            }
+
             this.region = DetectorRegion.create(blockCollection);
 
             signals.set(signal.getSignalID() + ".detectorRegion", this.region.getUniqueId().toString());
