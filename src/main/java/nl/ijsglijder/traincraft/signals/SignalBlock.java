@@ -4,15 +4,14 @@ import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.detector.DetectorListener;
 import com.bergerkiller.bukkit.tc.detector.DetectorRegion;
-import com.bergerkiller.bukkit.tc.utils.TrackMovingPoint;
 import nl.ijsglijder.traincraft.TrainCraft;
 import nl.ijsglijder.traincraft.files.TrainFile;
+import nl.ijsglijder.utils.pathFinding.TrainSignalPathFinding;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -26,6 +25,7 @@ public class SignalBlock implements DetectorListener {
 
         TrainFile file = TrainCraft.getFileManager().getFile("signals.yml");
         FileConfiguration signals = file.getFc();
+        int i = 0;
 
         if(!signals.contains(signal.getSignalID() + ".detectorRegion")) {
             Vector vector = new Vector(-1,0,0);
@@ -44,28 +44,12 @@ public class SignalBlock implements DetectorListener {
                     vector = new Vector(0,0,-1);
                     break;
             }
-            TrackMovingPoint walkingPoint = new TrackMovingPoint(block1.getLocation(), vector);
-            Collection<Block> blockCollection = new ArrayList<>();
 
+            List<Block> blockCollection = TrainSignalPathFinding.getRoute(block1, vector, block2);
 
-            walkingPoint.setLoopFilter(true);
-
-            blockCollection.add(block1);
-            while(walkingPoint.hasNext()) {
-                walkingPoint.next();
-                Block b = walkingPoint.current;
-                blockCollection.add(b);
-                if(new SignalVector(b.getLocation()).toString().equals(new SignalVector(block1.getLocation()).toString())) {
-                    blockCollection = new ArrayList<>();
-                    blockCollection.add(b);
-                }
-                if(new SignalVector(b.getLocation()).toString().equals(new SignalVector(block2.getLocation()).toString())) {
-                    break;
-                }
+            if(blockCollection.size() == 0) {
+                TrainCraft.getPlugin(TrainCraft.class).getLogger().info("Failed to get the detection region for signal " + signal.getSignalID() + " at " + signal.getVector().toString());
             }
-
-
-
 
             this.region = DetectorRegion.create(blockCollection);
 
