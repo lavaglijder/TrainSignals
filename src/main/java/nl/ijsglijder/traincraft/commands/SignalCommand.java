@@ -329,7 +329,7 @@ public class SignalCommand implements CommandExecutor, Listener, TabCompleter {
                     List<String> stringList = playerLinkStage.get(player);
                     stringList.add(TrainCraft.getSignalManager().getSignal(new SignalVector(block.getLocation())).getSignalID());
                     playerLinkStage.replace(player, stringList);
-                    player.sendMessage(TrainCraft.getSignalManager().getSignal(ChatColor.BLUE.toString() + new SignalVector(block.getLocation())).toString() + " has been added to the links, type \"done\" when you are done");
+                    player.sendMessage(ChatColor.BLUE.toString() + TrainCraft.getSignalManager().getSignal(new SignalVector(block.getLocation())).getSignalID() + " has been added to the links, type \"done\" when you are done");
                     break;
                 case 11:
                     switch(playerSignalType.get(player)) {
@@ -505,6 +505,7 @@ public class SignalCommand implements CommandExecutor, Listener, TabCompleter {
             strings.add("unlink");
             strings.add("delete");
             strings.add("refreshdetector");
+            strings.add("create");
         }
         if(args.length == 1) {
             strings.add("link");
