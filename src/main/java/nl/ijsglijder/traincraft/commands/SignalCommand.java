@@ -512,6 +512,7 @@ public class SignalCommand implements CommandExecutor, Listener, TabCompleter {
             strings.add("unlink");
             strings.add("delete");
             strings.add("refreshdetector");
+            strings.add("create");
         }
         if(args.length == 2) {
             switch(args[0]) {
