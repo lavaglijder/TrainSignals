@@ -1,13 +1,12 @@
 package nl.ijsglijder.traincraft.signals;
 
-import nl.ijsglijder.traincraft.TrainCraft;
+import nl.ijsglijder.traincraft.TrainSignals;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class SignalManager {
 
@@ -15,6 +14,7 @@ public class SignalManager {
     HashMap<String, SignalClass> signalsAsString = new HashMap<>();
     HashMap<String, List<String>> signalLinks = new HashMap<>();
     HashMap<String, List<String>> signalStationLinks = new HashMap<>();
+    HashMap<String, List<String>> signalSwitcherLinks = new HashMap<>();
 
     public SignalManager() {
 
@@ -29,7 +29,6 @@ public class SignalManager {
     }
 
     public void addSignal(SignalClass signal) {
-        signals.put(new SignalVector(signal.getLocation()), signal);
         signalsAsString.put(signal.getSignalID(), signal);
     }
 
@@ -53,7 +52,7 @@ public class SignalManager {
     public void removeSignal(SignalClass signal, boolean deleteFromDB) {
         signal.removeDetector();
         if(deleteFromDB) {
-            FileConfiguration fc = TrainCraft.getFileManager().getFile("signals.yml").getFc();
+            FileConfiguration fc = TrainSignals.getFileManager().getFile("signals.yml").getFc();
 
             fc.getKeys(true).forEach(s -> {
                 if(s.startsWith(signal.getSignalID()+ ".")) fc.set(s, null);
@@ -142,11 +141,66 @@ public class SignalManager {
         strings.remove(signalID2);
         signalStationLinks.replace(signalID, strings);
     }
-
     public List<String> getLinkedStationSignals(SignalClass signalClass) {
         return getLinkedStationSignals(signalClass.getSignalID());
     }
     public List<String> getLinkedStationSignals(String signalID) {
         return this.signalStationLinks.get(signalID);
+    }
+
+    /**
+       Switcher links
+     */
+    public void addSwitcherLink(SignalClass signalClass, String signalID) {
+        if(!signalSwitcherLinks.containsKey(signalClass.getSignalID())) signalSwitcherLinks.put(signalClass.getSignalID(), new ArrayList<>());
+        List<String> strings = signalSwitcherLinks.get(signalClass.getSignalID());
+        strings.add(signalID);
+        signalSwitcherLinks.replace(signalClass.getSignalID(), strings);
+    }
+
+    public void addSwitcherLink(String signalID, String signalID2) {
+        if(!signalSwitcherLinks.containsKey(signalID)) signalSwitcherLinks.put(signalID, new ArrayList<>());
+        List<String> strings = signalSwitcherLinks.get(signalID);
+        strings.add(signalID2);
+        signalSwitcherLinks.replace(signalID, strings);
+    }
+
+    public void removeSwitcherLink(SignalClass signalClass, String signalID) {
+        if(!signalSwitcherLinks.containsKey(signalClass.getSignalID())) signalSwitcherLinks.put(signalClass.getSignalID(), new ArrayList<>());
+        List<String> strings = signalSwitcherLinks.get(signalClass.getSignalID());
+        strings.remove(signalID);
+        signalStationLinks.replace(signalClass.getSignalID(), strings);
+    }
+
+    public void removeSwitcherLink(String signalID, String signalID2) {
+        if(!signalSwitcherLinks.containsKey(signalID)) signalSwitcherLinks.put(signalID, new ArrayList<>());
+        List<String> strings = signalSwitcherLinks.get(signalID);
+        strings.remove(signalID2);
+        signalSwitcherLinks.replace(signalID, strings);
+    }
+
+    public List<String> getLinkedSwitcherSignals(SignalClass signalClass) {
+        return getLinkedSwitcherSignals(signalClass.getSignalID());
+    }
+    public List<String> getLinkedSwitcherSignals(String signalID) {
+        return this.signalSwitcherLinks.get(signalID);
+    }
+
+
+
+    public HashMap<String, SignalClass> getSignalsAsString() {
+        return signalsAsString;
+    }
+
+    public HashMap<String, List<String>> getSignalLinks() {
+        return signalLinks;
+    }
+
+    public HashMap<String, List<String>> getSignalStationLinks() {
+        return signalStationLinks;
+    }
+
+    public HashMap<String, List<String>> getSignalSwitcherLinks() {
+        return signalSwitcherLinks;
     }
 }

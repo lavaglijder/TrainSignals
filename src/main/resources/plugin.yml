@@ -3,7 +3,7 @@ depend:
   - Train_Carts
   - BKCommonLib
 version: ${project.version}
-main: nl.ijsglijder.traincraft.TrainCraft
+main: nl.ijsglijder.traincraft.TrainSignals
 api-version: 1.15
 description: Rail signals for mc!
 author: ijsglijder

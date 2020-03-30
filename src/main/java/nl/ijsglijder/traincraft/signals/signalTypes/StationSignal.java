@@ -1,10 +1,11 @@
 package nl.ijsglijder.traincraft.signals.signalTypes;
 
 import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
-import nl.ijsglijder.traincraft.TrainCraft;
+import nl.ijsglijder.traincraft.TrainSignals;
 import nl.ijsglijder.traincraft.signals.LookingDirection;
 import nl.ijsglijder.traincraft.signals.SignalClass;
 import nl.ijsglijder.traincraft.signals.SignalManager;
+import nl.ijsglijder.traincraft.signals.switcher.SwitcherSignal;
 import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -28,7 +29,7 @@ public class StationSignal extends SignalClass {
             public void run() {
                 setSignalStatus(SignalStatus.RED);
             }
-        }.runTask(TrainCraft.getPlugin(TrainCraft.class));
+        }.runTaskLater(TrainSignals.getPlugin(TrainSignals.class), 20);
     }
 
     public void onTrainEnterStation(MinecartGroup minecartGroup) {
@@ -45,7 +46,7 @@ public class StationSignal extends SignalClass {
                 trainsReadyToStart.add(minecartGroup);
             }
         };
-        this.bukkitRunnable.runTaskLater(TrainCraft.getPlugin(TrainCraft.class), 20 * waitTime);
+        this.bukkitRunnable.runTaskLater(TrainSignals.getPlugin(TrainSignals.class), 20 * waitTime);
     }
 
     public void onTrainLeavesStation(MinecartGroup minecartGroup) {
@@ -60,10 +61,10 @@ public class StationSignal extends SignalClass {
         trainsReadyToStart.remove(minecartGroup);
         super.addInBlock(minecartGroup);
 
-        SignalManager signalManager = TrainCraft.getSignalManager();
+        SignalManager signalManager = TrainSignals.getSignalManager();
         if(signalManager.getLinkedSignals(getSignalID()) != null) {
-            TrainCraft.getSignalManager().getLinkedSignals(getSignalID()).forEach(s -> {
-                if(signalManager.getSignal(s) != null)  TrainCraft.getSignalManager().getSignal(s).onNextBlockNotClear();
+            TrainSignals.getSignalManager().getLinkedSignals(getSignalID()).forEach(s -> {
+                if(signalManager.getSignal(s) != null)  TrainSignals.getSignalManager().getSignal(s).onNextBlockNotClear();
             });
         }
         if(signalManager.getLinkedStationSignals(getSignalID()) != null) {
@@ -77,6 +78,17 @@ public class StationSignal extends SignalClass {
                 }
             });
         }
+        if(signalManager.getLinkedSwitcherSignals(getSignalID()) != null) {
+            signalManager.getLinkedSwitcherSignals(getSignalID()).forEach(s -> {
+                if(signalManager.getSignal(s) != null) {
+                    SignalClass signalSelected = signalManager.getSignal(s);
+                    if(signalSelected instanceof SwitcherSignal) {
+                        SwitcherSignal switcherSignal = (SwitcherSignal) signalSelected;
+                        switcherSignal.trainQueueEnter(this, minecartGroup);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -84,10 +96,21 @@ public class StationSignal extends SignalClass {
         if(trainsReadyToStart.size() > 0) setSignalStatus(isOccupiedNext() ? SignalStatus.YELLOW: SignalStatus.GREEN);
         super.removeInBlock(minecartGroup);
 
-        SignalManager signalManager = TrainCraft.getSignalManager();
+        SignalManager signalManager = TrainSignals.getSignalManager();
         if(signalManager.getLinkedSignals(getSignalID()) != null) {
             signalManager.getLinkedSignals(getSignalID()).forEach(s -> {
                 if(signalManager.getSignal(s) != null) signalManager.getSignal(s).onNextBlockClear();
+            });
+        }
+        if(signalManager.getLinkedSwitcherSignals(getSignalID()) != null) {
+            signalManager.getLinkedSwitcherSignals(getSignalID()).forEach(s -> {
+                if(signalManager.getSignal(s) != null) {
+                    SignalClass signalSelected = signalManager.getSignal(s);
+                    if(signalSelected instanceof SwitcherSignal) {
+                        SwitcherSignal switcherSignal = (SwitcherSignal) signalSelected;
+                        switcherSignal.trainQueueLeave(this, minecartGroup);
+                    }
+                }
             });
         }
     }

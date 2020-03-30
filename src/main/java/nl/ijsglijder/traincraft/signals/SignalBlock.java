@@ -4,13 +4,14 @@ import com.bergerkiller.bukkit.tc.controller.MinecartGroup;
 import com.bergerkiller.bukkit.tc.controller.MinecartMember;
 import com.bergerkiller.bukkit.tc.detector.DetectorListener;
 import com.bergerkiller.bukkit.tc.detector.DetectorRegion;
-import nl.ijsglijder.traincraft.TrainCraft;
+import nl.ijsglijder.traincraft.TrainSignals;
 import nl.ijsglijder.traincraft.files.TrainFile;
 import nl.ijsglijder.utils.pathFinding.TrainSignalPathFinding;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -20,14 +21,13 @@ public class SignalBlock implements DetectorListener {
     SignalClass signal;
     DetectorRegion region;
 
-    public SignalBlock(Block block1, Block block2, SignalClass signalClass) {
+    public SignalBlock(Block block1, List<SignalVector> block2, SignalClass signalClass) {
         this.signal = signalClass;
 
-        TrainFile file = TrainCraft.getFileManager().getFile("signals.yml");
+        TrainFile file = TrainSignals.getFileManager().getFile("signals.yml");
         FileConfiguration signals = file.getFc();
-        int i = 0;
 
-        if(!signals.contains(signal.getSignalID() + ".detectorRegion")) {
+        if(!signals.contains(signal.getSignalID() + ".detectorRegion") ||  DetectorRegion.getRegion(UUID.fromString(Objects.requireNonNull(signals.getString(signal.getSignalID() + ".detectorRegion")))) == null) {
             Vector vector = new Vector(-1,0,0);
 
             switch(signalClass.getLookingDirection()) {
@@ -47,8 +47,25 @@ public class SignalBlock implements DetectorListener {
 
             List<Block> blockCollection = TrainSignalPathFinding.getRoute(block1, vector, block2);
 
-            if(blockCollection.size() == 0) {
-                TrainCraft.getPlugin(TrainCraft.class).getLogger().info("Failed to get the detection region for signal " + signal.getSignalID() + " at " + signal.getVector().toString());
+            if(blockCollection.size() <= 1) {
+                switch(signalClass.getLookingDirection()) {
+                    case NORTH:
+                        vector = new Vector(0,0,-1);
+                        break;
+                    case EAST:
+                        vector = new Vector(1,0,0);
+                        break;
+                    case WEST:
+                        vector = new Vector(-1,0,0);
+                        break;
+                    case SOUTH:
+                        vector = new Vector(0,0,1);
+                        break;
+                }
+                blockCollection = TrainSignalPathFinding.getRoute(block1, vector, new ArrayList<>(block2));
+                if(blockCollection.size() <= 1) {
+                    TrainSignals.getPlugin(TrainSignals.class).getLogger().info("Failed to get the detection region for signal " + signal.getSignalID() + " at " + signal.getVector().toString());
+                }
             }
 
             if(blockCollection.isEmpty()) {
@@ -67,7 +84,7 @@ public class SignalBlock implements DetectorListener {
 
     @Override
     public void onRegister(DetectorRegion detectorRegion) {
-        signal.setSignalStatus(SignalClass.SignalStatus.GREEN);
+        signal.getSignals().forEach(signalVector -> signal.setSignalStatus(SignalClass.SignalStatus.GREEN, signalVector));
     }
 
     @Override

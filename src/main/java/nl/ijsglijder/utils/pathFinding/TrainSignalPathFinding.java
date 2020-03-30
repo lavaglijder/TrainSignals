@@ -11,15 +11,24 @@ import org.bukkit.block.data.Rail;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TrainSignalPathFinding {
 
-    public static List<Block> getRoute(Block from, Vector vector, Block to) {
-        return getRoute(from, vector, to, 0);
+    public static List<Block> getRoute(Block from, Vector vector, SignalVector to) {
+        return getRoute(from, vector, Collections.singletonList(to), Collections.singletonList(to), 0);
     }
 
-    public static List<Block> getRoute(Block from, Vector vector, Block to, int distancePast) {
+    public static List<Block> getRoute(Block from, Vector vector, SignalVector to, int distancePast) {
+        return getRoute(from, vector, Collections.singletonList(to), Collections.singletonList(to), distancePast);
+    }
+
+    public static List<Block> getRoute(Block from, Vector vector, List<SignalVector> to) {
+        return getRoute(from, vector, to, new ArrayList<>(to), 0);
+    }
+
+    public static List<Block> getRoute(Block from, Vector vector, List<SignalVector> to, List<SignalVector> allTo, int distancePast) {
         TrackMovingPoint trackMovingPoint = new TrackMovingPoint(from.getLocation(), vector);
 
         List<Block> blockList = new ArrayList<>();
@@ -27,113 +36,18 @@ public class TrainSignalPathFinding {
         trackMovingPoint.next();
 
         blockList.add(trackMovingPoint.current);
-        while(trackMovingPoint.hasNext() && distancePast < 150) {
+        while(trackMovingPoint.hasNext() && distancePast < 150 && !to.isEmpty()) {
             trackMovingPoint.next();
             Block current = trackMovingPoint.current;
 
             blockList.add(current);
 
-            if(new SignalVector(to.getLocation()).equals(new SignalVector(current.getLocation()))) {
+            if(to.contains(new SignalVector(current.getLocation()))) {
+                to.remove(new SignalVector(current.getLocation()));
                 foundDest = true;
                 break;
             }
-            if(isSwitcher(current.getLocation()) && !from.equals(current)) {
-                if(current.getBlockData() instanceof Rail) {
-                    Rail rail = (Rail) current.getBlockData();
-                    Rail.Shape previousShape = rail.getShape();
-                    List<Rail.Shape> possible = railsPossibleRoutes(current.getLocation());
-
-                    for(Rail.Shape shape : possible) {
-                        rail.setShape(shape);
-                        current.setBlockData(rail);
-
-                        List<Block> blockFound = getRoute(current, trackMovingPoint.currentDirection, to, distancePast);
-                        if(blockFound.size() > 0) {
-                            foundDest = true;
-                            blockList.addAll(blockFound);
-                            break;
-                        }
-                    }
-                    rail.setShape(previousShape);
-                    current.setBlockData(rail);
-                } else {
-                    break;
-                }
-                break;
-            }
-            distancePast++;
-        }
-
-        if(foundDest) {
-            return blockList;
-        }
-        return new ArrayList<>();
-    }
-
-    public static List<Block> getRoute(Block from, Vector vector, List<Block> to) {
-        TrackMovingPoint trackMovingPoint = new TrackMovingPoint(from.getLocation(), vector);
-
-        List<Block> blockList = new ArrayList<>();
-        boolean foundDest = false;
-        trackMovingPoint.next();
-
-        blockList.add(trackMovingPoint.current);
-        int distancePast = 0;
-        while(trackMovingPoint.hasNext() && distancePast < 150) {
-            trackMovingPoint.next();
-            Block current = trackMovingPoint.current;
-
-            blockList.add(current);
-
-            if(to.contains(current)) {
-                to.remove(current);
-                if(to.isEmpty()) {
-                    break;
-                }
-            }
-            if(isSwitcher(current.getLocation()) && !from.equals(current)) {
-                if(current.getBlockData() instanceof Rail) {
-                    Rail rail = (Rail) current.getBlockData();
-                    Rail.Shape previousShape = rail.getShape();
-                    List<Rail.Shape> possible = railsPossibleRoutes(current.getLocation());
-
-                    for(Rail.Shape shape : possible) {
-                        rail.setShape(shape);
-                        current.setBlockData(rail);
-
-                        List<Block> blockFound = getRoute(current, trackMovingPoint.currentDirection, to, distancePast);
-                        blockList.addAll(blockFound);
-                    }
-                    rail.setShape(previousShape);
-                    current.setBlockData(rail);
-                }
-                break;
-            }
-            distancePast++;
-        }
-
-        if(to.isEmpty()) {
-            return blockList;
-        }
-        return new ArrayList<>();
-    }
-
-    public static List<Block> getRoute(Block from, Vector vector, List<Block> to, int distancePast) {
-        TrackMovingPoint trackMovingPoint = new TrackMovingPoint(from.getLocation(), vector);
-
-        List<Block> blockList = new ArrayList<>();
-        boolean foundDest = false;
-        trackMovingPoint.next();
-
-        blockList.add(trackMovingPoint.current);
-        while(trackMovingPoint.hasNext() && distancePast < 150) {
-            trackMovingPoint.next();
-            Block current = trackMovingPoint.current;
-
-            blockList.add(current);
-
-            if(to.contains(current)) {
-                to.remove(current);
+            if(allTo.contains(new SignalVector(current.getLocation()))) {
                 foundDest = true;
                 break;
             }
@@ -148,7 +62,7 @@ public class TrainSignalPathFinding {
                         rail.setShape(shape);
                         current.setBlockData(rail);
 
-                        List<Block> blockFound = getRoute(current, trackMovingPoint.currentDirection, to, distancePast);
+                        List<Block> blockFound = getRoute(current, trackMovingPoint.currentDirection, to, allTo, distancePast);
                         blockList.addAll(blockFound);
                         if(blockList.size() > 0) {
                             foundDest = true;
@@ -181,6 +95,10 @@ public class TrainSignalPathFinding {
         return false;
     }
 
+    public static boolean isRail(Location location) {
+        return RailType.findRailPiece(location) != null;
+    }
+
     /*
     Only allows same Y
      */
@@ -206,7 +124,7 @@ public class TrainSignalPathFinding {
         }
         if(location3.getBlock().getType().equals(Material.RAIL)) {
             RailType railType = RailType.getType(location3.getBlock());
-            if(railType.getDirection(location3.getBlock()).toString().contains("WEST")) {
+            if(railType.getDirection(location3.getBlock()).toString().contains("WEST") || railType.getDirection(location3.getBlock()).toString().equalsIgnoreCase("EAST")) {
                 blockList.add(Rail.Shape.SOUTH_EAST);
                 blockList.add(Rail.Shape.EAST_WEST);
                 blockList.add(Rail.Shape.NORTH_EAST);
@@ -222,7 +140,7 @@ public class TrainSignalPathFinding {
         }
         if(location5.getBlock().getType().equals(Material.RAIL)) {
             RailType railType = RailType.getType(location5.getBlock());
-            if(railType.getDirection(location5.getBlock()).toString().contains("NORTH")) {
+            if(railType.getDirection(location5.getBlock()).toString().contains("NORTH") || railType.getDirection(location5.getBlock()).toString().equalsIgnoreCase("SOUTH")) {
                 blockList.add(Rail.Shape.SOUTH_EAST);
                 blockList.add(Rail.Shape.NORTH_SOUTH);
                 blockList.add(Rail.Shape.SOUTH_WEST);

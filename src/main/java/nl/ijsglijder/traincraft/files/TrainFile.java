@@ -1,6 +1,6 @@
 package nl.ijsglijder.traincraft.files;
 
-import nl.ijsglijder.traincraft.TrainCraft;
+import nl.ijsglijder.traincraft.TrainSignals;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,6 +21,7 @@ public class TrainFile {
         this.file = new File(getPlugin().getDataFolder(), path);
 
         if(!this.file.exists()) {
+            //noinspection ResultOfMethodCallIgnored
             this.file.getParentFile().mkdirs();
             getPlugin().saveResource(path, configFile);
         }
@@ -54,7 +55,7 @@ public class TrainFile {
     }
 
     private JavaPlugin getPlugin() {
-        return TrainCraft.getPlugin(TrainCraft.class);
+        return TrainSignals.getPlugin(TrainSignals.class);
     }
 
     public String getPath() {
